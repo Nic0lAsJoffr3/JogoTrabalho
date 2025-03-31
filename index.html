@@ -1,1 +1,225 @@
+</html>
+<!DOCTYPE html>
+<html lang="pt-br">
 
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jogo das Lampadas</title>
+  <style>
+    body {
+      margin: 0px;
+      background-color: #E4E4E4;
+    }
+    
+    .prin {
+      padding: 2px;
+      background-color: #FFFFFF;
+      margin-top: 0px;
+      margin-left: 5%;
+      margin-right: 5%;
+      width: 90%;
+      top: 0;
+      position: fixed;
+      min-height: 1000px;
+      box-shadow: 0px 0px 4px black;
+    }
+    
+    h1 {
+      text-align: center;
+    }
+    
+    h2 {
+      text-align: center;
+      font-size: 17px;
+    }
+    
+    .AreaDeJogo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background-color: white;
+      
+    }
+    
+    .AreaDeJogo button {
+      border: none;
+      text-align: center;
+      background-color: transparent;
+      margin: 10%;
+      padding: 25px;
+      border-radius: 3px;
+      border-left: 1px solid black;
+      border-right: 2px solid gray;
+      border-top: 1px solid black;
+      border-bottom: 2px solid gray;
+      background-color: #F6F3F3;
+    }
+    
+    .AreaDeJogo button:active {
+      background-color: #E9E9E9;
+      border-left: 2px solid black;
+      border-right: 1px solid gray;
+      border-top: 2px solid black;
+      border-bottom: 1px solid gray;
+    }
+    
+    .lampadas {
+      background-color: white;
+      margin-bottom: 10%;
+      width: 100%;
+      height: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-gap: 5%;
+    }
+    
+    .lampadas img {
+      width: 100%;
+    }
+    
+    footer {
+      margin: 0px;
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      background-color: transparent;
+      padding: 10px 0;
+    }
+    
+    .ope {
+      margin-top: 25px;
+      font-size: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="prin">
+    <h1>Jogo das Lampadas</h1>
+    <h2>Objetivo: acender todas as lâmpadas</h2>
+    <details>
+  <summary>Regras</summary>
+<ul>
+  <li>Aperte os botões para acender as lampadas;</li>
+  
+  <li>A cada jogada um botão será desativado, quando dois botões estiverem desativados o próximo ativara o primeiro;</li>
+  
+  <li>A cada jogada invertesse o sinal entre (+) e (-).</li>
+</ul>
+</details>
+    <div class="ope" id="ope">+</div>
+    <div class="lampadas" id="lampadas"></div>
+    <div class="AreaDeJogo" id="AreaDeJogo"></div>
+    <footer>
+      Desenvolvido por Nicolas Joffre
+    </footer>
+  </div>
+  <script>
+    
+    let nivel = 15;
+    let binCode = [];
+    let quantLamp = 2;
+    let somar = true;
+    var fr = ["", ""];
+    // valor dos botões 
+    let btn = [
+      [],
+      [],
+      [],
+      []
+    ]
+    let btnA = [-1,-1];
+    
+    // ajustar a quantidade de dados e lampadas
+    for (var i = 0; i < nivel; i++) {
+      quantLamp *= 2;
+      binCode[i] = 0;
+      
+      // atualizar botões 
+      
+      btn[0][i] = (i + 1) % 2 == 0 ? 1 : 0;
+      btn[1][i] = i % 2 == 0 ? 1 : 0;
+      btn[2][i] = (i + 1) % 3 == 0 ? 1 : 0;
+      btn[3][i] = i % 3 == 0 ? 1 : 0;
+      
+      // gerar lampadas
+      document.getElementById("lampadas").innerHTML += '<img id="img' + i + '" src="off.png">';
+      
+      // ajustar grid
+      if (i + 1 % 5 == 0) {
+        fr[1] += " 1fr ";
+      } else if (i < 5) {
+        fr[0] += " 1fr ";
+      }
+    }
+    
+    // Corrigindo quantia maxima de dados
+    quantLamp /= 2;
+    
+    // Arrumando a grid
+    document.getElementById("lampadas").style.gridTemplateColumns = fr[0];
+    document.getElementById("lampadas").style.gridTemplateRows = fr[1];
+    
+    // gerar botões
+    for (var i = 0; i < 4; i++) {
+      text = "";
+      for (var ii = 0; ii <= btn[i].length - 1; ii++) {
+        text += btn[i][ii].toString();
+        if ((ii + 1) % 5 == 0) {
+          text += "<br>"
+        }
+      }
+      document.getElementById("AreaDeJogo").innerHTML += '<button id="' + i + '" onclick="lampClick(' + JSON.stringify(btn[i]) + ',' + i + ')">' + text + '</button>';
+    }
+    
+    
+    //função ao clicar nos botões 
+    function lampClick(num, id) {
+      btnA[1] = btnA[0]
+      btnA[0]+= 1;
+      if(btnA[0] >= 4) btnA[0] = 0;
+      if(btnA[1] >= 4) btnA[1] = 0;
+      
+      for (i = 0; i <= 3; i++) {
+        if (i == btnA[0] || i == btnA[1]) {
+          document.getElementById(i).disabled = true;
+        }
+        else {
+          document.getElementById(i).disabled = false;
+        }
+      }
+      for (var i = 0; i < binCode.length; i++) {
+        binCode[i] += num[i] * (somar ? 1 : -1);
+        if (binCode[i] < 0) {
+          binCode[i] = 0
+        }
+        if (binCode[i] > 1) {
+          binCode[i] = 1
+        }
+      }
+      somar = !somar;
+    }
+    // loop
+    setInterval(() => {
+      
+      // Atualizar o indicador de operação
+      document.getElementById("ope").innerText = somar ? "+" : "-";
+      ganhou = true;
+      for (b in binCode){
+        if(b == 0) ganhou = false
+      }
+      if(ganhou) alert("Parabéns você ganhou!")
+      // Atualizar as lampadas
+      for (var i = 0; i < nivel; i++) {
+        document.getElementById("img" + i).src = binCode[i] <= 0 ? "off.png" : "on.png";
+      }
+    }, 100);
+  </script>
+</body>
+
+</html>
